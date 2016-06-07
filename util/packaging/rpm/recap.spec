@@ -1,14 +1,14 @@
 Name: recap
-Version: 0.9.10
-Release: 1%{?dist}
+Version: 0.9.14
+Release: 1.rs%{?dist}
 Summary: System status reporting
 Group: Applications/System
 License: GPLv2
 Url: https://github.com/rackerlabs/%{name}
 Source0: https://github.com/rackerlabs/%{name}/archive/%{version}.tar.gz
 BuildArch: noarch
-%{?el5:BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)}
-Requires: sysstat, coreutils, procps, grep, gawk, bc, net-tools
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+Requires: sysstat, coreutils, procps, grep, gawk, bc, elinks, net-tools, iotop
 
 
 %description
@@ -22,31 +22,29 @@ optional reporting on Apache, MySQL, and network connections.
 
 
 %install
-%{?el5:%{__rm} -rf %{buildroot}}
-%{__install} -Dm0755 recap %{buildroot}%{_sbindir}/recap
-%{__install} -Dm0755 recaptool %{buildroot}%{_sbindir}/recaptool
-%{__install} -Dm0644 recap.conf %{buildroot}%{_sysconfdir}/recap
-%{__install} -Dm0644 recap.cron %{buildroot}%{_sysconfdir}/cron.d/recap
-%{__install} -Dm0644 recap.conf.d %{buildroot}%{_sysconfdir}/httpd/conf.d/recap
-%{__install} -Dm0644 recap.5.gz %{buildroot}%{_mandir}/man5/recap.5.gz
-%{__install} -Dm0644 recap.8.gz %{buildroot}%{_mandir}/man8/recap.8.gz
-%{__install} -dm0700 %{buildroot}%{_localstatedir}/log/recap
+%{__rm} -rf %{buildroot}
+DESTDIR=%{buildroot} make install
 
 
-%{?el5:%clean}
-%{?el5:%{__rm} -rf %{buildroot}}
+%clean
+%{__rm} -rf %{buildroot}
 
 
 %files
-%doc README.md TODO CHANGELOG COPYING
+%{!?_licensedir:%global license %%doc}
+%license COPYING
+%doc README.md TODO CHANGELOG
 %dir %{_localstatedir}/log/recap
+%dir %{_localstatedir}/log/recap/backups
+%dir %{_localstatedir}/log/recap/snapshots
 %{_sbindir}/recap
+%{_sbindir}/recaplog
 %{_sbindir}/recaptool
 %config(noreplace) %{_sysconfdir}/cron.d/recap
-%config(noreplace) %{_sysconfdir}/httpd/conf.d/recap
 %config(noreplace) %{_sysconfdir}/recap
 %{_mandir}/man5/recap.5.gz
 %{_mandir}/man8/recap.8.gz
+%{_mandir}/man8/recaplog.8.gz
 
 
 %post
@@ -74,9 +72,35 @@ echo "Edit /etc/cron.d/recap to change cron execution."
 
 
 %changelog
+* Wed May 11 2016 Ben Harper <ben.harper@rackspace.com> - 0.9.14-1.rs
+- Latest version
+- Fixing typos, removing commented old code, renaming functions
+
+* Wed May 04 2016 Carl George <carl.george@rackspace.com> - 0.9.13-1.rs
+- Latest version
+- Install recaplog man page
+
+* Fri Apr 22 2016 Carl George <carl.george@rackspace.com> - 0.9.12-1.rs
+- Latest version
+- Use Makefile to install
+
+* Tue Apr 12 2016 Carl George <carl.george@rackspace.com> - 0.9.11-3.rs
+- Add missing recaplog file
+- Use appropriate license directory when possible
+- Remove httpd example configuration
+
+* Mon Apr 11 2016 Carl George <carl.george@rackspace.com> - 0.9.11-2.rs
+- Add rs to release
+
+* Wed Jan 06 2016 Carl George <carl.george@rackspace.com> - 0.9.11-1
+- Latest version
+
 * Mon Dec 21 2015 Carl George <carl.george@rackspace.com> - 0.9.10-1
 - Latest version
 - Update dependencies
+
+* Fri Jun 12 2015 Carl George <carl.george@rackspace.com> - 0.9.8-2
+- Fix EL5 COPR build
 
 * Wed Jan 07 2015 Carl George <carl.george@rackspace.com> - 0.9.8-1
 - Latest version
